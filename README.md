@@ -100,10 +100,10 @@ FANET Groundstation
 
 ### configuration
    - edit config/MRFGS.json - some working defaults
-   - Todo: options
+   - see: [configuration file format](config/ConfigurationFileFormat.md)
 
 ### execute
-   - create empty file ./MRFGS.lock in file where FANET_GS_AIR is executed 
+   - create empty file ./MRFGS.lock in execution directory 
 
     start ./MRFGS 
    - will use ./config/MRFGS.json as default configuration
@@ -118,4 +118,5 @@ FANET Groundstation
     ./cwopLog.txt
      
 ### configure automatic start
- - ...
+ - on Linux level - e.g. in rc.local or rc.d
+ 
