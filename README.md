@@ -7,7 +7,29 @@ FANET Groundstation
 
 ## Features
 
-### receive and process FANET packets
+### Weather
+- receive 'Internet Weather' - e.g Holfuy stations
+- send weather data to FANET
+- relay weather data messages e.g. from SkyTraxx Windstations to Internet / Windy
+         
+### Live-Tracking
+- forward received tracks to 
+   - glidernet.org APRS-IS servers
+   - DB via PHP call on HTTP server
+        
+### Upcoming
+- Documentation (sic)
+- Remote control - e.g. via Telegram
+- Messages
+    - relay FANET messages
+    - send messages to FANET receivers e.g. from Telegram
+ - Accident handling 
+    - relay last know position of missed FANET device to an aletr channel
+ - forward other tracksource traffic to FANET
+    - support vehicle position from GPS source
+    - FLARM traffic - e.g. helicopters or gliders in local area
+
+#### receive and process FANET packets
 * Type 0 - ACK
 * Type 1 - (Air)Tracking
 * Type 2 - Name
@@ -18,7 +40,7 @@ FANET Groundstation
 * Type 9 - Thermals
 * Type A - Device Info - (new)
 
-### send FANET packets
+#### send FANET packets
 * Type 0 - ACK
 * Type 1 - (Air)Tracking
 * Type 2 - Name
