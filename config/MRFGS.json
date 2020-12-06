@@ -46,10 +46,6 @@
           "active": true,
           "excludeFanetPlus": true
         },
-        "summaryPushing":{
-          "active":false,
-          "interval":3600
-        },
         "weatherPolling":{
           "active":true,
           "interval":60

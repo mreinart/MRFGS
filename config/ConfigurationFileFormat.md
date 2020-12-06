@@ -40,11 +40,14 @@ JSON format with various sections
               "active":true,
               "interval":15                     // [sec] - pause between packets
             },
-            "trackPushing":{                    // forward received tracks
+            "trackPushing":{                    // forward received FANET tracks
               "active":true,
               "interval":3000                   // [msec]
             },
-
+            "trackRelaying":{                   // relay 'other' received tracks to FANET
+              "active": true,
+              "excludeFanetPlus": true          // exclude FANET+ tracks like SykTraxx which are sending FANET & FLARM to vaoid duplicates
+            },
             "weatherPolling":{                  // fetch weather from internet weather stations
               "active":true,
               "interval":60                     // [sec]

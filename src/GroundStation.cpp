@@ -402,13 +402,8 @@ void GroundStation::run() {
     AprsOgnManager *arpsHelper = AprsOgnManager::getInstance();
     unsigned int interval = Configuration::getInstance()->getValue(
             "/configuration/features/summaryPushing/interval", 300);
-    bool summaryPushing = Configuration::getInstance()->getValue("/configuration/features/summaryPushing/active",
-                                                                 false);
 	while (!finished_) {
         arpsHelper->sendReceiverBeacon(this);
-		if (summaryPushing) {
-		    // e.g. Telegram channel
-		}
 		this_thread::sleep_for(chrono::seconds(interval));
 	}
 	LOG_F(INFO, "Groundstation - END");
