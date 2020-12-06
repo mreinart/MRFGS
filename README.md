@@ -17,6 +17,10 @@ FANET Groundstation
    - glidernet.org APRS-IS servers
    - DB via PHP call on HTTP server
         
+### other 
+- send Names for devices not sending type 2 packates on their own (like AirWhere or SoftRF)
+- send Landmarks e.g. for takeoff or landing sites
+
 ### Upcoming
 - Documentation (sic)
 - Remote control - e.g. via Telegram
@@ -100,10 +104,18 @@ FANET Groundstation
 
 ### execute
    - create empty file ./MRFGS.lock in file where FANET_GS_AIR is executed 
-   - start ./MRFGS
-   - trace file ./fanet_packets.txt
-   - trace file ./aprsLog.txt
-   - trace file ./cwopLog.txt
+
+    start ./MRFGS 
+   - will use ./config/MRFGS.json as default configuration
+
+#### commandline options:
+    -c,--config <path to configuration file> 
+
+#### tracing
+    ./log directory - everything.log
+    ./fanet_packets.txt
+    ./aprsLog.txt
+    ./cwopLog.txt
      
 ### configure automatic start
  - ...
