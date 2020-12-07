@@ -54,4 +54,28 @@ add_executable(MRFGS
         src/fanet_GS/fanet_terminal.c src/fanet_GS/fanet_terminal.h
 )
 
+add_executable(inoGS
+        src/ino_main.cpp
+        src/loguru.cpp src/loguru.hpp
+        src/telnet/telnet.c src/telnet/telnet.h
+        src/Packet.cpp src/Packet.h
+        src/Track.cpp src/Track.h
+        src/Configuration.cpp src/Configuration.h
+        src/WeatherMeasure.cpp src/WeatherMeasure.h
+        src/WeatherStation.cpp src/WeatherStation.h
+        src/WeatherStationManager.cpp src/WeatherStationManager.h
+        src/HolfuyWeatherStation.cpp src/HolfuyWeatherStation.h
+        src/WindyWeatherStation.cpp src/WindyWeatherStation.h
+        src/EntityName.cpp src/EntityName.h
+        src/GroundStation.cpp src/GroundStation.h
+        src/Landmark.cpp src/Landmark.h
+        src/Message.cpp src/Message.h
+        src/include/TDequeConcurrent.h
+        src/include/rapidjson/rapidjson.h
+        src/include/rapidcsv.h
+        src/AprsOgnManager.cpp src/AprsOgnManager.h
+        src/AprsCwopServer.cpp src/AprsCwopServer.cpp
+        )
+
 target_link_libraries(MRFGS wiringPi ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES}  ${CURL_LIBRARIES} dl libTgBot.a rt)
+target_link_libraries(inoGS          ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES}  ${CURL_LIBRARIES} dl libTgBot.a rt)
