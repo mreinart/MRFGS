@@ -8,16 +8,20 @@ JSON format with various sections
 
 ## example
     {
+### Station configuration
         "configuration":{               // The configuration object
+#### Station ID
           "stationId": "FD0017",                // textual ID - 6 characters - does not need to match the FANET-ID
           "stationName": "MRFGSPI17",           // name - char[9] (max)
           "manufacturerId":"0xFC",              // FANET manufacturer ID
           "uniqueId":"0x0017",                  // FANET unique ID
+#### Station geo position
           "position":{                          // for reporting to OGN and distance calculation
             "latitude":49.21,                   // [decimal degrees]
             "longitude":8.37,                   // [decimal degrees]
             "altitude":117                      // [m]
           },
+#### HW Info
           "hwinfo":{                            // for type 8 packets
             "active": true,
             "type": 17,
@@ -28,6 +32,7 @@ JSON format with various sections
             "add1": 42,
             "add2": 17
           },
+### Feature configuration
           "features":{                          // feature switches
           
             "fanetRadio":{
@@ -67,6 +72,8 @@ JSON format with various sections
               "active": true  
             }
           },
+          
+### Connection settings
           "APRS":{                              // APRS OGN
             "active": true,
             "server":"glidern5.glidernet.org",
@@ -83,11 +90,13 @@ JSON format with various sections
             "user":"CWOP-ID",                   // specify your own - max. 9 characters
             "pass":"12345"                      // generate matching APRS passcode
           },
+### Packet DB
           "PacketDB": {                         // host to send FANET packets to
             "active": true,
             "updateHost": "www.tranier.de",     
             "updateUrlPacket" : "/fgs/m/add_fanet_packet.php"
           },
+### Track DB
           "TrackDB": {                          // host to send track info to
             "active": true,
             "updateHost": "www.tranier.de",
@@ -95,12 +104,14 @@ JSON format with various sections
             "updateUrlDevice" : "/m/add_fanet_device.php",
             "readUrl" : "/m/get_vehicle_pos_recent.php"
           },
+### Weather DB
           "WeatherDB": {                        // host to send weather info to
             "active": true,
             "updateHost": "www.tranier.de",
             "updateUrl" : "/m/add_fanet_weather.php",
             "readUrl" : "/m/get_fanet_weather_csv.php"
           },
+### Windy
           "WindyUpdate": {                      // Windy API parameters
             "active": false,
             "windyHost": "stations.windy.com",
@@ -112,7 +123,7 @@ JSON format with various sections
             "statusUrl": "/pws/station/open/"
           },
  
-          
+### Weather stations
           "weatherStations":[                   // Array of weather stations to be handled
             {
               "active":true,                    // flag for processing 
@@ -148,7 +159,7 @@ JSON format with various sections
             }
           ],
           
-          
+### FANET names
           "fanetNames":[                        // Array of names to be published to FANET
             { 
                 "active":false,                 // flag for processing
@@ -159,9 +170,10 @@ JSON format with various sections
                 "uniqueId":"0x2442"             // FANET unique ID
             }
           ],
-          
-          
+          ...
+### Landmarks
           "landmarks":[                         // Array of Landmark geo information
+#### Single point with text
             {                                           // POI example with text label
               "active":false,
               "type":0, "id":"GER1", "text": "GER1",
@@ -173,6 +185,7 @@ JSON format with various sections
               "type":0, "layer":0, "id":"Hohe-LP", "text": "LP-Hohenberg",
               "coordinates": [ {"lat":49.202584, "lon":8.005003} ]
             },
+#### Polygon with text
             {                                   // Orensfels landing site shape
               "active":false,                   // currently not published
               "type":4,
@@ -191,6 +204,7 @@ JSON format with various sections
               }
             },
             
+#### Polygon with text - landing approach procedure
             {
               "active":false,
               "type":0,
@@ -224,23 +238,7 @@ JSON format with various sections
               },
               "diameter": 50
             },
-            {                                           // Merkur landing site
-              "active": true,
-              "type": 4,
-              "id": "LP-Merkur",
-              "text": "LP-Merkur",
-              "layer": 4,
-              "geometry": {
-                "type": "Polygon",
-                "coordinates": [
-                  [
-                    [8.260149, 48.763983],
-                    ...
-                    [8.260149, 48.763983]
-                  ]
-                ]
-              }
-            }
+            ...
           ]
         }
       }
