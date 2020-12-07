@@ -1,12 +1,12 @@
 //
-// GroundStation
+// FANET GroundStation
 //
 
-#include "GroundStation.h"
+#include "FanetGroundStation.h"
 #include "AprsOgnManager.h"
 #include "Configuration.h"
 #include "Packet.h"
-//TTT#include "Vehicle.h"
+#include "Vehicle.h"
 
 #include "loguru.hpp"
 #include <sstream>
@@ -34,131 +34,7 @@ extern "C" {
 #include "fanet_GS/fanet_t7_tracking.h"
 }
 
-// Push data do website via PHP URL
-//
-void GroundStation::sendTrackToDfDb(Track *track) {
-    LOG_SCOPE_FUNCTION(6);
-    struct tm *timeinfo;
-    timeinfo = localtime(&track->timestamp);
-    char timeBuf[25];
-    strftime(timeBuf, sizeof(timeBuf), "%Y-%m-%d %H:%M:%S", timeinfo);
-    httplib::SSLClient client(trackDbHost_.c_str());
-    httplib::Headers headers;
-    headers.emplace("Accept-Encoding", "gzip, deflate");
-    httplib::Params params;
-    char paramStr[25];
-    sprintf(paramStr, "%s", track->callsign);
-    params.emplace("device", paramStr);
-    params.emplace("tms", timeBuf);
-    sprintf(paramStr, "%s", this->fanetId().c_str());
-    params.emplace("received_by", paramStr);
-    sprintf(paramStr, "%d", track->type);
-    params.emplace("type", paramStr);
-    sprintf(paramStr, "%f", track->latitude);
-    params.emplace("lat", paramStr);
-    sprintf(paramStr, "%f", track->longitude);
-    params.emplace("lon", paramStr);
-    sprintf(paramStr, "%d", track->altitude);
-    params.emplace("alt", paramStr);
-    sprintf(paramStr, "%f", track->heading);
-    params.emplace("course", paramStr);
-    sprintf(paramStr, "%f", track->speed);
-    params.emplace("speed", paramStr);
-    sprintf(paramStr, "%2.1f", track->climbRate);
-    params.emplace("vspd", paramStr);
-    sprintf(paramStr, "%2.1f", track->turnRate);
-    params.emplace("trate", paramStr);
-    sprintf(paramStr, "%2.1f", track->distance);
-    params.emplace("dist", paramStr);
-    sprintf(paramStr, "%d", track->tracking);
-    params.emplace("track", paramStr);
-    char uri[255];
-    //?device=110B0D&tms=2020-03-13 20:06:44&received_by=FD7777&course=321&speed=42&vspd=22&trate=88&lat=49.21&lon=8.321&alt=333&type=7
-    sprintf(uri, "%s?device=%s&tms=%s&received_by=%s&course=%f&speed=%f&vspd=%2.1f&trate=%2.1f&lat=%f&lon=%f1&alt=%d&dist=%f&type=%d&track=%d",
-            updateUrlTrack_.c_str(), track->callsign, timeBuf, this->fanetId().c_str(),
-            track->heading, track->speed, track->climbRate, track->turnRate,
-            track->latitude, track->longitude, track->altitude, track->distance, track->type, track->tracking);
-    LOG_F(5, "Pushing track of device %s to DF-DB from %s", track->callsign, this->fanetId().c_str());
-    auto res = client.Get(uri, headers);
-    // Post oddly not working from here - while it is from Postman
-    if (res != nullptr)
-        LOG_F(9, "%s", res->body.c_str());
-}
-
-// Push data do DF website via PHP URL
-// example: http://www.duddefliecher.de/m/add_fanet_device.php
-//              ?station=FD0003&tms=2020-02-23 18:19:40&name=
-void GroundStation::sendDeviceToDfDb(Device *device) {
-    LOG_SCOPE_FUNCTION(6);
-    struct tm *timeinfo;
-    time_t tms = device->timestamp;
-    timeinfo = localtime(&tms);
-    char timeBuf[25];
-    strftime(timeBuf, sizeof(timeBuf), "%Y-%m-%d %H:%M:%S", timeinfo);
-    httplib::SSLClient client(trackDbHost_.c_str());
-    httplib::Headers headers;
-    headers.emplace("Accept-Encoding", "gzip, deflate");
-    httplib::Params params;
-    char paramStr[25];
-    sprintf(paramStr, "%s", device->id.c_str());
-    params.emplace("device", paramStr);
-    params.emplace("tms", timeBuf);
-    sprintf(paramStr, "%s", this->fanetId().c_str());
-    params.emplace("received_by", paramStr);
-    sprintf(paramStr, "%d", device->type);
-    params.emplace("type", paramStr);
-    sprintf(paramStr, "%s", device->name.c_str());
-    params.emplace("name", paramStr);
-    char uri[255];
-    //?device=110B0D&tms=2020-03-13 20:06:44&received_by=FD7777&name=ABCD&type=7
-    sprintf(uri, "%s?device=%s&tms=%s&received_by=%s&type=%d&name=%s",
-            updateUrlDevice_.c_str(), device->id.c_str(), timeBuf, this->fanetId().c_str(), device->type, device->name.c_str());
-    LOG_F(5, "Pushing Name of device %s %s to DF-DB from %s", device->id.c_str(), device->name.c_str(), this->fanetId().c_str());
-    auto res = client.Get(uri, headers);
-    // Post oddly not working from here - while it is from Postman
-    if (res != nullptr)
-        LOG_F(9, "%s", res->body.c_str());
-}
-
-void GroundStation::sendPacketToDfDb(Packet *packet) {
-    LOG_SCOPE_FUNCTION(6);
-    if (!pushPackets_) {
-        return;
-    }
-    struct tm *timeinfo;
-    time_t tms = packet->radioData.timestamp;
-    timeinfo = localtime(&tms);
-    char timeBuf[25];
-    strftime(timeBuf, sizeof(timeBuf), "%Y-%m-%d %H:%M:%S", timeinfo);
-    httplib::SSLClient client(packetDbHost_.c_str());
-    httplib::Headers headers;
-    headers.emplace("Accept-Encoding", "gzip, deflate");
-    httplib::Params params;
-    char paramStr[25];
-    char devIdStr[10];
-    sprintf(devIdStr, "%02X%04X", packet->fanetMAC.s_manufactur_id, packet->fanetMAC.s_unique_id);
-    params.emplace("device", devIdStr);
-    params.emplace("tms", timeBuf);
-    sprintf(paramStr, "%s", this->fanetId().c_str());
-    params.emplace("received_by", paramStr);
-    sprintf(paramStr, "%d", packet->fanetMAC.type);
-    params.emplace("type", paramStr);
-    sprintf(paramStr, "%s", "ABCD");//packet->toJson().c_str());
-    params.emplace("hexstr", paramStr);
-    char uri[10000];
-    //?device=110B0D&tms=2020-03-13 20:06:44&received_by=FD7777&hexstr={<JSON>}&type=x
-    sprintf(uri, "%s?device=%s&tms=%s&received_by=%s&type=%d&hexstr=%s",
-            updateUrlPacket_.c_str(), devIdStr, timeBuf, this->fanetId().c_str(), packet->fanetMAC.type, packet->toJson().c_str());
-    LOG_F(5, "Pushing packet from %s to DF-DB from %s", devIdStr, this->fanetId().c_str());
-    auto res = client.Get(uri, headers);
-    // Post oddly not working from here - while it is from Postman
-    if (res != nullptr)
-        LOG_F(5, "%s", res->body.c_str());
-}
-
-GroundStation *GroundStation::instance_ = nullptr;
-
-void GroundStation::init() {
+void FanetGroundStation::init() {
 	LOG_SCOPE_FUNCTION(INFO);
     if (!initialized_) {
         initialized_ = true;
@@ -206,9 +82,9 @@ void GroundStation::init() {
                                                                   "/m/add_fanet_packet.php");
         LOG_IF_F(INFO, pushPackets_, "-- Pushing packets");
 
-/* TTT
         Document jsonDoc;
         jsonDoc.Parse(Configuration::getInstance()->getJson().c_str());
+
         Value *vehArray = Pointer("/configuration/vehicles").Get(jsonDoc);
         if (vehArray && vehArray->IsArray()) {
             for (auto &veh : vehArray->GetArray()) {
@@ -227,22 +103,12 @@ void GroundStation::init() {
                 }
             }
         }
-*/
     } else {
         LOG_F(INFO, "FANET Groundstation already initialized");
     }
 }
 
-string GroundStation::fanetId() {
-    return fanetId_;
-}
-
-string GroundStation::name() {
-    return name_;
-}
-
-/*
-void GroundStation::sendTrackToFANET(Track *track) {
+void FanetGroundStation::sendTrackToFANET(Track *track) {
     LOG_F(INFO, "Send Track to FANET: %s", track->toString().c_str());
     AirTrack *airTrack = dynamic_cast<AirTrack*>(track);
     if (airTrack != NULL) {
@@ -254,7 +120,7 @@ void GroundStation::sendTrackToFANET(Track *track) {
     }
 }
 
-void GroundStation::sendAirTrackToFANET(AirTrack *track) {
+void FanetGroundStation::sendAirTrackToFANET(AirTrack *track) {
     LOG_F(INFO, "Send AirTrack to FANET: %s", track->toString().c_str());
     std::unique_lock<std::mutex> lock{radioMutex};
 
@@ -297,7 +163,7 @@ void GroundStation::sendAirTrackToFANET(AirTrack *track) {
     terminal_message_1(true, false, &_radiodata, &_fanet_mac, &_rx_tracking);
 }
 
-void GroundStation::sendGndTrackToFANET(GroundTrack *track) {
+void FanetGroundStation::sendGndTrackToFANET(GroundTrack *track) {
     LOG_F(INFO, "Send GndTrack to FANET: %s", track->toString().c_str());
     std::unique_lock<std::mutex> lock{radioMutex};
 
@@ -331,26 +197,8 @@ void GroundStation::sendGndTrackToFANET(GroundTrack *track) {
     type_7_tracking_decoder(&_tx_message, &_fanet_mac, &_rx_tracking);
     terminal_message_7(true, false, &_radiodata, &_fanet_mac, &_rx_tracking);
 }
-*/
-void GroundStation::addName(EntityName *entityName) {
-    LOG_F(5, "addName %s", entityName->toString().c_str());
-    int count = deviceMap.count(entityName->id);
-    if (deviceMap.count(entityName->id) > 0) {
-        deviceMap.at(entityName->id)->name = entityName->name;
-    } else {
-        LOG_F(INFO, "New Device %s", entityName->id.c_str());
-        Device *newDevice = new Device(entityName->id);
-        newDevice->manufacturerId = entityName->manufacturerId;
-        newDevice->uniqueId = entityName->uniqueId;
-        newDevice->timestamp = time(0);
-        //type
-        newDevice->firstPosition = nullptr;
-        newDevice->lastPosition = nullptr;
-        deviceMap.insert(pair<string, Device *>(newDevice->id, newDevice));
-    }
-}
 
-void GroundStation::addTrack(Track *track) {
+void FanetGroundStation::addTrack(Track *track) {
 	LOG_F(5, "addTrack %s", track->id.c_str());
 	int count = deviceMap.count(track->callsign);
 	if (deviceMap.count(track->callsign) > 0) {
@@ -370,11 +218,11 @@ void GroundStation::addTrack(Track *track) {
     if (relayTracksLegacy2Fanet_) {
         if (track->manufacturerId != 0x11) {
             LOG_F(6, "Relay LEG track to FANET");
-//TTT            sendTrackToFANET(track);
+            sendTrackToFANET(track);
         } else {
             if (!relayTracksExcludeFanetPlus_) {
                 LOG_F(6, "Relaying FANET+LEG track to FANET");
-//TTT                sendTrackToFANET(track);
+                sendTrackToFANET(track);
             } else {
                 // Do not relay FANET+ devices which are sending LEG and FANET in parallel
             }
@@ -382,25 +230,9 @@ void GroundStation::addTrack(Track *track) {
     }
 }
 
-string GroundStation::getStatusInfo() {
+void FanetGroundStation::run() {
 	LOG_SCOPE_FUNCTION(INFO);
-	stringstream ss;
-	ss << "Groundstation "
-	   << name_ << endl
-	   << " #Devices: " << deviceMap.size() << endl;
-	int i = 0;
-	for (map<string, Device *>::iterator iter = deviceMap.begin(); iter != deviceMap.end(); iter++) {
-		ss << "-- device[" << ++i << "] - ID: " << iter->second->id << " / " << iter->second->name << endl;
-		ss << "  - first position : " << iter->second->firstPosition->toString() << endl;
-		ss << "  - last position  : " << iter->second->lastPosition->toString() << endl;
-	}
-	ss << "--" << endl;
-	return string(ss.str());
-}
-
-void GroundStation::run() {
-	LOG_SCOPE_FUNCTION(INFO);
-	LOG_F(INFO, "Groundstation %s - RUN", name_.c_str());
+	LOG_F(INFO, "FanetGroundstation %s - RUN", name_.c_str());
     AprsOgnManager *arpsHelper = AprsOgnManager::getInstance();
     unsigned int interval = Configuration::getInstance()->getValue(
             "/configuration/features/summaryPushing/interval", 300);
@@ -408,7 +240,7 @@ void GroundStation::run() {
         arpsHelper->sendReceiverBeacon(this);
 		this_thread::sleep_for(chrono::seconds(interval));
 	}
-	LOG_F(INFO, "Groundstation - END");
+	LOG_F(INFO, "FanetGroundstation - END");
 }
 
 

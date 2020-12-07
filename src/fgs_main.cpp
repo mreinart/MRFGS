@@ -28,7 +28,7 @@
 #include "Track.h"
 #include "EntityName.h"
 #include "Landmark.h"
-#include "GroundStation.h"
+#include "FanetGroundStation.h"
 #include "Message.h"
 
 #include <chrono>
@@ -106,7 +106,7 @@ void receiveFanetWeather(
 
 void sendWeather(WeatherStation *ws) {
     LOG_SCOPE_FUNCTION(5);
-    std::mutex *_mutexRadio = &GroundStation::getInstance()->radioMutex;
+    std::mutex *_mutexRadio = &FanetGroundStation::getInstance()->radioMutex;
     if (ws->lastMeasure) {
         std::unique_lock<std::mutex> lock{*_mutexRadio};
 
@@ -169,9 +169,9 @@ void receivepacket(bool requireValidBit, bool requireValidCRC) {
 	sRawMessage _rx_radio;
 	sRawMessage _rx_payload;
 	sRadioData _radiodata;
-    TDequeConcurrent<Track*> *trackQueuePtr = &GroundStation::getInstance()->trackQueue;
-    TDequeConcurrent<EntityName*> *nameQueuePtr = &GroundStation::getInstance()->nameQueue;
-    std::mutex *_mutexRadio = &GroundStation::getInstance()->radioMutex;
+    TDequeConcurrent<Track*> *trackQueuePtr = &FanetGroundStation::getInstance()->trackQueue;
+    TDequeConcurrent<EntityName*> *nameQueuePtr = &FanetGroundStation::getInstance()->nameQueue;
+    std::mutex *_mutexRadio = &FanetGroundStation::getInstance()->radioMutex;
 
     std::unique_lock<std::mutex> lock{*_mutexRadio};
 	bool radioRxData = read_rx_data(&_rx_radio, &_radiodata);   // receive packet
@@ -194,7 +194,7 @@ void receivepacket(bool requireValidBit, bool requireValidCRC) {
         packet->rawMessage = _rx_radio;
         packet->fanetMAC = _fanet_mac;
         LOG_F(2, "RAW: %s", packet->toString().c_str());
-        GroundStation::getInstance()->packetQueue.emplace_back(packet);
+        FanetGroundStation::getInstance()->packetQueue.emplace_back(packet);
 
 		if (_fanet_mac.ack) {
             LOG_F(1, "send - ACK: %02X:%04X->%02X:%04X",
@@ -329,14 +329,14 @@ void trackProducer() {
 
 void forwardTracksToInternet(bool doTrackPush, bool pushToAprs, bool pushToKtrax, bool pushToTelegram) {
     VLOG_SCOPE_F(1, "TrackConsumer - trying to consume...");
-    TDequeConcurrent<Track*> *trackQueuePtr = &GroundStation::getInstance()->trackQueue;
+    TDequeConcurrent<Track*> *trackQueuePtr = &FanetGroundStation::getInstance()->trackQueue;
     list<Track*> trackList;
     if (!trackQueuePtr->empty()) {
         LOG_SCOPE_FUNCTION(1);
         while (!trackQueuePtr->empty()) {
             auto tr = trackQueuePtr->pop_front();
             LOG_F(INFO, "APRS - consuming (%lu) : %s", trackQueuePtr->size(), tr->toString().c_str());
-            GroundStation::getInstance()->addTrack(tr);
+            FanetGroundStation::getInstance()->addTrack(tr);
             trackList.emplace_back(tr);
         }
         if (doTrackPush && pushToAprs) {
@@ -353,7 +353,7 @@ void forwardTracksToInternet(bool doTrackPush, bool pushToAprs, bool pushToKtrax
 void sendFanetWeatherToInternet() {
     VLOG_SCOPE_F(1, "sendFanetWeatherToInternet - trying to consume...");
     TDequeConcurrent<WeatherMeasure*> *fanetWeatherQueuePtr = &WeatherStationManager::getInstance()->fanetWeatherQueue;
-    TDequeConcurrent<Track*> *trackQueuePtr = &GroundStation::getInstance()->trackQueue;
+    TDequeConcurrent<Track*> *trackQueuePtr = &FanetGroundStation::getInstance()->trackQueue;
     if (!fanetWeatherQueuePtr->empty()) {
         LOG_SCOPE_FUNCTION(INFO);
         while (!fanetWeatherQueuePtr->empty()) {
@@ -407,7 +407,7 @@ void sendHwInfo(
     LOG_SCOPE_FUNCTION(5);
     LOG_F(1, "sendHwInfo: %02X:%04X : %02d - %04d-%02d-%02d : %02X %02X",
           manufacturerId, uniqueId, device_type, fw_build_year, fw_build_month, fw_build_day, fw_add1, fw_add2);
-    std::mutex *_mutexRadio = &GroundStation::getInstance()->radioMutex;
+    std::mutex *_mutexRadio = &FanetGroundStation::getInstance()->radioMutex;
 
     std::unique_lock<std::mutex> lock{*_mutexRadio};
     sRadioData _radiodata;
@@ -450,7 +450,7 @@ void sendMessage(bool unicast, u_int8_t s_manufacturerId, u_int16_t s_uniqueId, 
           s_manufacturerId, s_uniqueId,
           d_manufacturerId, d_uniqueId,
           message.c_str());
-    std::mutex *_mutexRadio = &GroundStation::getInstance()->radioMutex;
+    std::mutex *_mutexRadio = &FanetGroundStation::getInstance()->radioMutex;
     std::unique_lock<std::mutex> lock{*_mutexRadio};
 
     sRadioData _radiodata;
@@ -524,8 +524,8 @@ void queuesConsumer() {
     int pauseSecsBetweenStations = Configuration::getInstance()->getValue("/configuration/features/weatherPushing/pause", 5);
     int maxAgeSeconds = Configuration::getInstance()->getValue("/configuration/features/weatherPushing/maxAge", 300);
 
-    TDequeConcurrent<Packet*>* packetQueuePtr = &GroundStation::getInstance()->packetQueue;
-    TDequeConcurrent<EntityName*> *nameQueuePtr = &GroundStation::getInstance()->nameQueue;
+    TDequeConcurrent<Packet*>* packetQueuePtr = &FanetGroundStation::getInstance()->packetQueue;
+    TDequeConcurrent<EntityName*> *nameQueuePtr = &FanetGroundStation::getInstance()->nameQueue;
 
     LOG_F(INFO, "WeatherMeasureConsumer - RUN - interval %d / %d [sec]", weatherPushInterval, pauseSecsBetweenStations);
     while (!finished) {
@@ -534,7 +534,7 @@ void queuesConsumer() {
             while (!packetQueuePtr->empty()) {
                 auto packet = packetQueuePtr->pop_front();
                 LOG_F(1, "Packet - consuming (%lu) : %s", packetQueuePtr->size(), packet->toString().c_str());
-                GroundStation::getInstance()->sendPacketToDfDb(packet);
+                FanetGroundStation::getInstance()->sendPacketToDfDb(packet);
             }
         }
         LOG_F(1, "Pushing Names to DB");
@@ -547,7 +547,7 @@ void queuesConsumer() {
                 device->manufacturerId = nameEntity->manufacturerId;
                 device->uniqueId = nameEntity->uniqueId;
                 device->timestamp = time(0);
-                GroundStation::getInstance()->sendDeviceToDfDb(device);
+                FanetGroundStation::getInstance()->sendDeviceToDfDb(device);
             }
         }
         LOG_F(1, "Pushing FANET track data to Inet");
@@ -559,9 +559,9 @@ void queuesConsumer() {
         LOG_F(7, "TrackConsumer - going to sleep for %d [msec]", intervalTrackPush);
         std::this_thread::sleep_for(chrono::milliseconds(intervalTrackPush));
 
-        if (GroundStation::getInstance()->sendHwInfo) {
-            FirmwareInfo *fwInfo = &GroundStation::getInstance()->fwInfo;
-            sendHwInfo(GroundStation::getInstance()->manufacturerId, GroundStation::getInstance()->uniqueId,
+        if (FanetGroundStation::getInstance()->sendHwInfo) {
+            FirmwareInfo *fwInfo = &FanetGroundStation::getInstance()->fwInfo;
+            sendHwInfo(FanetGroundStation::getInstance()->manufacturerId, FanetGroundStation::getInstance()->uniqueId,
                        0x42, fwInfo->year, fwInfo->month, fwInfo->day, fwInfo->experimental, fwInfo->add1, fwInfo->add2);
         }
     } // while
@@ -573,7 +573,7 @@ void queuesConsumer2() {
     loguru::set_thread_name("Queue2-Cons");
 
     int intervalMessagePush = Configuration::getInstance()->getValue("/configuration/features/messagePushing/interval", 3000);
-    TDequeConcurrent<Message*> *messageQueuePtr = &GroundStation::getInstance()->messageToFanetQueue;
+    TDequeConcurrent<Message*> *messageQueuePtr = &FanetGroundStation::getInstance()->messageToFanetQueue;
 
     while (!finished) {
         LOG_F(6, "Pushing Messages to FANET");
@@ -603,7 +603,7 @@ void weatherStationManagerRunner (int pauseSecs) {
 void sendName(u_int8_t manufacturerId, u_int16_t uniqueId, string name) {
 	LOG_SCOPE_FUNCTION(5);
 	LOG_F(5, "sendName: %s", name.c_str());
-    std::mutex *_mutexRadio = &GroundStation::getInstance()->radioMutex;
+    std::mutex *_mutexRadio = &FanetGroundStation::getInstance()->radioMutex;
 	std::unique_lock<std::mutex> lock{*_mutexRadio};
 
 	sRadioData _radiodata;
@@ -652,9 +652,9 @@ void nameHandler(int pauseSecs, int pauseSecsBetweenNames) {
 
 void groundStationManagerRunner(int pauseSecs) {
     loguru::set_thread_name("GS-RUN");
-	LOG_F(INFO, "GroundStationManager - RUN");
- 	GroundStation::getInstance()->run();
-	LOG_F(INFO, "GroundStationManager - END");
+	LOG_F(INFO, "FanetGroundStationManager - RUN");
+    FanetGroundStation::getInstance()->run();
+	LOG_F(INFO, "FanetGroundStationManager - END");
 };
 
 void landmarkManagerRunner() {
@@ -676,8 +676,8 @@ void vehiclePositionHandler(int pauseSecs, int pauseSecsBetweenNames) {
     LOG_F(INFO, "VehiclePositionHandler - RUN - interval %d / %d [sec]", pauseSecs, pauseSecsBetweenNames);
     while (!finished) {
         VLOG_SCOPE_F(5, "VehiclePositionHandler - sending vehicle positions");
-        for (map<string, Vehicle *>::iterator iter = GroundStation::getInstance()->vehicleMap.begin();
-                iter != GroundStation::getInstance()->vehicleMap.end(); iter++) {
+        for (map<string, Vehicle *>::iterator iter = FanetGroundStation::getInstance()->vehicleMap.begin();
+                iter != FanetGroundStation::getInstance()->vehicleMap.end(); iter++) {
             Vehicle *vehicle = iter->second;
             LOG_F(5, "updating Vehicle: %s", iter->first.c_str());
             vehicle->update();
@@ -685,7 +685,7 @@ void vehiclePositionHandler(int pauseSecs, int pauseSecsBetweenNames) {
                 LOG_F(5, "Vehicle: %s - %s", iter->first.c_str(), vehicle->lastPosition->toString().c_str());
                 time_t now = time(0);
                 if ((now - vehicle->maxAgeSeconds) <= vehicle->lastPosition->timestamp) {
-                    GroundStation::getInstance()->addTrack(iter->second->lastPosition);
+                    FanetGroundStation::getInstance()->addTrack(iter->second->lastPosition);
                 } else {
                     LOG_F(7, "Vehicle - last position too old");
                 }
@@ -708,7 +708,7 @@ void log_to_rsyslog(void*, const loguru::Message& message)
 
 int main(int argc, char *argv[]) {
 
-    CLI::App app("FANET Groundstation");
+    CLI::App app("FANET FanetGroundStation");
     // add version output
     app.set_version_flag("--version", string("0.0.1"));
 

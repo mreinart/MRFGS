@@ -31,6 +31,7 @@ add_executable(MRFGS
         src/WindyWeatherStation.cpp src/WindyWeatherStation.h
         src/EntityName.cpp src/EntityName.h
         src/GroundStation.cpp src/GroundStation.h
+        src/FanetGroundStation.cpp src/FanetGroundStation.h
         src/Landmark.cpp src/Landmark.h
         src/Message.cpp src/Message.h
         src/include/TDequeConcurrent.h
@@ -67,15 +68,29 @@ add_executable(inoGS
         src/HolfuyWeatherStation.cpp src/HolfuyWeatherStation.h
         src/WindyWeatherStation.cpp src/WindyWeatherStation.h
         src/EntityName.cpp src/EntityName.h
+        src/FanetWeatherStation.cpp src/FanetWeatherStation.h
         src/GroundStation.cpp src/GroundStation.h
-        src/Landmark.cpp src/Landmark.h
         src/Message.cpp src/Message.h
         src/include/TDequeConcurrent.h
         src/include/rapidjson/rapidjson.h
         src/include/rapidcsv.h
         src/AprsOgnManager.cpp src/AprsOgnManager.h
         src/AprsCwopServer.cpp src/AprsCwopServer.cpp
+#        src/fanet_GS/fanet_t0_ack.c src/fanet_GS/fanet_t0_ack.h
+        src/fanet_GS/fanet_t2_name.c src/fanet_GS/fanet_t2_name.h
+        src/fanet_GS/fanet_t1_tracking.c src/fanet_GS/fanet_t1_tracking.h
+        src/fanet_GS/fanet_t3_messenger.c src/fanet_GS/fanet_t3_messenger.h
+        src/fanet_GS/fanet_t4_service.c src/fanet_GS/fanet_t4_service.h
+        src/fanet_GS/fanet_t5_landmark.c src/fanet_GS/fanet_t5_landmark.h
+        src/fanet_GS/fanet_t7_tracking.c src/fanet_GS/fanet_t7_tracking.h
+        src/fanet_GS/fanet_t8_hwinfo.c src/fanet_GS/fanet_t8_hwinfo.h
+        src/fanet_GS/fanet_t9_thermal.c src/fanet_GS/fanet_t9_thermal.h
+        src/fanet_GS/fanet_global.c src/fanet_GS/fanet_global.h
+        src/fanet_GS/fanet_mac.c src/fanet_GS/fanet_mac.h
+#        src/fanet_GS/fanet_radio.c src/fanet_GS/fanet_radio.h
+        src/fanet_GS/fanet_struct.c src/fanet_GS/fanet_struct.h
+        src/fanet_GS/fanet_terminal.c src/fanet_GS/fanet_terminal.h
         )
 
-target_link_libraries(MRFGS wiringPi ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES}  ${CURL_LIBRARIES} dl libTgBot.a rt)
-target_link_libraries(inoGS          ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES}  ${CURL_LIBRARIES} dl libTgBot.a rt)
+target_link_libraries(MRFGS wiringPi ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} dl rt)
+target_link_libraries(inoGS          ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} dl rt)

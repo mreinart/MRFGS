@@ -27,6 +27,7 @@ namespace fanet {
     };
 
     class GroundStation {
+    protected:
 		static GroundStation *instance_;
 		bool initialized_;
 		bool finished_;
@@ -63,6 +64,7 @@ namespace fanet {
         TDequeConcurrent<EntityName*> nameQueue;
         std::mutex radioMutex;
 
+        virtual ~GroundStation() = default;
         static GroundStation *getInstance() {
 			if (instance_ == 0) {
 				instance_ = new GroundStation();
@@ -84,9 +86,6 @@ namespace fanet {
         void addTrack(Track *track);
         void addName(EntityName *entityName);
         void sendTrackToDfDb(Track *track);
-        void sendTrackToFANET(Track *track);
-        void sendAirTrackToFANET(AirTrack *track);
-        void sendGndTrackToFANET(GroundTrack *track);
 
         void sendDeviceToDfDb(Device *device);
         void sendPacketToDfDb(Packet *packet);
