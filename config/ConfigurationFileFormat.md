@@ -72,16 +72,16 @@ JSON format with various sections
             "server":"glidern5.glidernet.org",
             "appName":"MRGFS",
             "appVersion":"0.0.1",
-            "user":"APRS-ID",
-            "pass":"12345"
+            "user":"APRS-ID",                   // specify your own - max. 9 characters
+            "pass":"12345"                      // generate matching APRS passcode
           },
           "CWOP":{                              // APRS CWOP
             "active": true,                     // forward weather data to CWOP server
             "server": "129.15.108.117",
             "appName":"MRFGS",
             "appVersion":"0.0.1",
-            "user":"CWOP-ID",
-            "pass":"12345"
+            "user":"CWOP-ID",                   // specify your own - max. 9 characters
+            "pass":"12345"                      // generate matching APRS passcode
           },
           "PacketDB": {                         // host to send FANET packets to
             "active": true,
@@ -111,6 +111,7 @@ JSON format with various sections
             "windyHost": "stations.windy.com",
             "statusUrl": "/pws/station/open/"
           },
+ 
           
           "weatherStations":[                   // Array of weather stations to be handled
             {
@@ -130,22 +131,24 @@ JSON format with various sections
               "windyId": "5",                   // Windy API station ID
               "windyPush": false                // flag for push to Windy
             },
-            {
+            {                                   // SkyTraxx FANET Windstation
               "active":true,                    // flag for processing 
               "type":"FanetWeatherStation",     // type string
               "id":"SkyTraxx-011D",
               "name":"wGermersheim",
               "shortName":"doNotPublish",
-              "manufacturerId":"0x01",
-              "uniqueId":"0x011D",
+              "manufacturerId":"0x01",          // SkyTraxx Windstations FANET manuf. ID
+              "uniqueId":"0x011D",              // FANET unique ID
               "latitude":49.21,
               "longitude":8.37,
               "altitude":117,
-              "cwopId": "WX01011D",
-              "cwopPush": false,
-              "dbPush": true
+              "cwopId": "WX01011D",             // CWOP ID
+              "cwopPush": false,                // currently not pushed to CWOP
+              "dbPush": true                    // send to DB server for as basis for chart visualization on website
             }
           ],
+          
+          
           "fanetNames":[                        // Array of names to be published to FANET
             { 
                 "active":false,                 // flag for processing
@@ -156,6 +159,8 @@ JSON format with various sections
                 "uniqueId":"0x2442"             // FANET unique ID
             }
           ],
+          
+          
           "landmarks":[                         // Array of Landmark geo information
             {                                           // POI example with text label
               "active":false,
@@ -185,23 +190,7 @@ JSON format with various sections
                 ]
               }
             },
-            {
-              "active":false,
-              "type": 4,
-              "id":"LP-Hohe",
-              "text": "LP-Hohenberg",
-              "layer": 1,
-              "geometry": {
-                "type": "Polygon",
-                "coordinates": [
-                  [
-                    [7.994367, 49.207659],
-                    ...
-                    [7.994367, 49.207659]
-                  ]
-                ]
-              }
-            },
+            
             {
               "active":false,
               "type":0,
@@ -220,9 +209,7 @@ JSON format with various sections
                 "type": "LineString",
                 "coordinates": [
                   [7.994785, 49.209236],
-                  [7.995397, 49.207897],
-                  [7.994721, 49.207673],
-                  [7.994227, 49.208346]
+                  ...
                 ]
               }
             },
@@ -236,50 +223,6 @@ JSON format with various sections
                 "coordinates": [7.99441, 49.20918]
               },
               "diameter": 50
-            },
-            {
-              "active":false,
-              "type":0,
-              "id": "LP-GER",
-              "text": "LP-GER-Festplatz",
-              "layer": 1,
-              "coordinates": [
-                {"lat":49.219097, "lon":8.355693}
-              ]
-            },
-            {
-              "active":false,
-              "type":0,
-              "id": "GER-PAR",
-              "text": "GER-Paradeplatz",
-              "layer": 1,
-              "coordinates": [
-                {"lat":49.217562, "lon":8.375047}
-              ]
-            },
-            {
-              "active": false,
-              "type": 8,
-              "id": "LP-GER-PAR",
-              "text": "LP-GER-Paradeplatz",
-              "layer": 1,
-              "windDepend":false,
-              "windBits": 255,
-              "windSectors": ["N", "NE", "E", "SE", "S", "SW", "W", "NW"],
-              "altMin": -127,
-              "altMax": 127,          "geometry": {
-                "type": "Polygon",
-                "coordinates": [
-                  [
-                    [8.374983, 49.218025],
-                    [8.374425, 49.217723],
-                    [8.376024, 49.216728],
-                    [8.376142, 49.216770],
-                    [8.375165, 49.218109],
-                    [8.374983, 49.218025]
-                  ]
-                ]
-              }
             },
             {                                           // Merkur landing site
               "active": true,
