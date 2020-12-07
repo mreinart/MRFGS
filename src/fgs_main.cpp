@@ -529,7 +529,7 @@ void queuesConsumer() {
 
     LOG_F(INFO, "WeatherMeasureConsumer - RUN - interval %d / %d [sec]", weatherPushInterval, pauseSecsBetweenStations);
     while (!finished) {
-        LOG_F(1, "Pushing Packets to MQTT and Telegram");
+        LOG_F(1, "Pushing Packets to Inet/DB server");
         if (!packetQueuePtr->empty()) {
             while (!packetQueuePtr->empty()) {
                 auto packet = packetQueuePtr->pop_front();

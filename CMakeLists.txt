@@ -12,7 +12,7 @@ find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 include_directories(/usr/local/include /usr/local/opt/openssl/include )
-include_directories(src/fanet_GS src/include src/include/mqtt src/telnet)
+include_directories(src/fanet_GS src/include src/telnet)
 link_directories(/usr/local/opt/openssl/lib)
 
 add_executable(MRFGS
