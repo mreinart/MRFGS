@@ -5,7 +5,6 @@
 #include "Configuration.h"
 #include "Track.h"
 #include "Vehicle.h"
-//#include "MQTTManager.h"
 
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
