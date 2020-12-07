@@ -54,4 +54,4 @@ add_executable(MRFGS
         src/fanet_GS/fanet_terminal.c src/fanet_GS/fanet_terminal.h
 )
 
-target_link_libraries(MRFGS wiringPi ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES}  ${CURL_LIBRARIES} dl libTgBot.a rt)
+target_link_libraries(MRFGS wiringPi ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES}  ${CURL_LIBRARIES} dl rt)
