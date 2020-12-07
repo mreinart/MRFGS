@@ -181,7 +181,7 @@ void GroundStation::init() {
         fwInfo.day = config->getValue("/configuration/hwinfo/day", 1);
         fwInfo.add1 = config->getValue("/configuration/hwinfo/add1", 0x98);
         fwInfo.add2 = config->getValue("/configuration/hwinfo/add2", 0x76);
-        LOG_F(INFO, "FANET Groundstation - hwinfo: %04d-02d-%02d", fwInfo.year, fwInfo.month, fwInfo.day);
+        LOG_F(INFO, "FANET Groundstation - hwinfo: %04d-%02d-%02d", fwInfo.year, fwInfo.month, fwInfo.day);
         fwInfo.experimental = config->getValue("/configuration/hwinfo/experimental", true);
         LOG_IF_F(INFO, fwInfo.experimental, "-- experimental");
 
