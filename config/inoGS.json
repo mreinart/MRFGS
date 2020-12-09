@@ -1,13 +1,13 @@
   {
     "configuration":{
-      "stationId": "FD0017",
-      "stationName": "MRFGSPI17",
-      "manufacturerId":"0xFC",
-      "uniqueId":"0x0017",
+      "stationId": "FD00DF",
+      "stationName": "MRFGSPIDF",
+      "manufacturerId":"0xFD",
+      "uniqueId":"0x00DF",
       "position":{
         "latitude":49.21,
         "longitude":8.37,
-        "altitude":117
+        "altitude":111
       },
       "hwinfo":{
         "active": true,
@@ -21,7 +21,7 @@
       },
       "features":{
         "fanetRadio":{
-          "active":true,
+          "active":false,
           "interval": 1,
           "requireValidBit": false,
           "requireValidCRC": false
@@ -96,8 +96,7 @@
       "WeatherDB": {
         "active": true,
         "updateHost": "www.tranier.de",
-        "updateUrl" : "/m/add_fanet_weather.php",
-        "readUrl" : "/m/get_fanet_weather_csv.php"
+        "updateUrl" : "/m/add_fanet_weather.php"
       },
       "WindyUpdate": {
         "active": false,
@@ -111,7 +110,7 @@
       },
       "weatherStations":[
         {
-          "active":false,
+          "active":true,
           "type":"HolfuyWeatherStation",
           "id":"711",
           "name":"Hohenberg",

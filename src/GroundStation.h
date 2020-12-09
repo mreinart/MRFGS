@@ -39,8 +39,6 @@ namespace fanet {
         bool sendHwInfo_;
         bool pushTracks_;
         bool pushPackets_;
-        bool relayTracksLegacy2Fanet_;
-        bool relayTracksExcludeFanetPlus_; // (Do not) relay FANET+ devices which are sending LEG and FANET in parallel
         std::string trackDbHost_;
         std::string updateUrlTrack_;
         std::string updateUrlDevice_;
@@ -49,10 +47,9 @@ namespace fanet {
 
 		GroundStation() :
                 initialized_(false), finished_(false),
-                pushPackets_(false), pushTracks_(false), relayTracksLegacy2Fanet_(false),
-                relayTracksExcludeFanetPlus_(false),
+                pushPackets_(false), pushTracks_(false),
                 trackDbHost_(""), updateUrlTrack_(""), updateUrlDevice_(""), packetDbHost_(""), updateUrlPacket_("") {};
-        void init();
+        virtual void init();
 
 	public:
         std::map<std::string, Device *> deviceMap;
@@ -92,9 +89,10 @@ namespace fanet {
 
         std::string getStatusInfo();
 
-		void run();
+        virtual void run();
+        virtual void runIteration();
 
-		void stop() { finished_ = true; };
+		virtual void stop() { finished_ = true; };
 	};
 };
 

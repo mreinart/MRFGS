@@ -76,7 +76,6 @@ add_executable(inoGS
         src/include/rapidcsv.h
         src/AprsOgnManager.cpp src/AprsOgnManager.h
         src/AprsCwopServer.cpp src/AprsCwopServer.cpp
-#        src/fanet_GS/fanet_t0_ack.c src/fanet_GS/fanet_t0_ack.h
         src/fanet_GS/fanet_t2_name.c src/fanet_GS/fanet_t2_name.h
         src/fanet_GS/fanet_t1_tracking.c src/fanet_GS/fanet_t1_tracking.h
         src/fanet_GS/fanet_t3_messenger.c src/fanet_GS/fanet_t3_messenger.h
@@ -87,10 +86,9 @@ add_executable(inoGS
         src/fanet_GS/fanet_t9_thermal.c src/fanet_GS/fanet_t9_thermal.h
         src/fanet_GS/fanet_global.c src/fanet_GS/fanet_global.h
         src/fanet_GS/fanet_mac.c src/fanet_GS/fanet_mac.h
-#        src/fanet_GS/fanet_radio.c src/fanet_GS/fanet_radio.h
         src/fanet_GS/fanet_struct.c src/fanet_GS/fanet_struct.h
         src/fanet_GS/fanet_terminal.c src/fanet_GS/fanet_terminal.h
         )
 
 target_link_libraries(MRFGS wiringPi ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} dl rt)
-target_link_libraries(inoGS          ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} dl rt)
+target_link_libraries(inoGS          ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} dl)

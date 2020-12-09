@@ -43,6 +43,7 @@ void HolfuyWeatherStation::update() {
         LOG_F(ERROR, "NOT initialized: %s", this->id.c_str());
         return;
     }
+    LOG_F(2, "updating WeatherStation: %s", this->id.c_str());
 	this->lastUpdate = time(0);
 	time_t now = time(0);
 	struct tm *tm = localtime(&now);
@@ -73,7 +74,7 @@ void HolfuyWeatherStation::update() {
 			wm->hasTemperature = true;
 
 			this->lastMeasure = wm;
-			LOG_F(5, "WeatherMeasure: %s", wm->toString().c_str());
+			LOG_F(2, "WeatherMeasure: %s", wm->toString().c_str());
 		}
 	} catch (const std::exception &e) {
 		LOG_F(ERROR, "Issue with update of %s : %s", this->id.c_str(), e.what());

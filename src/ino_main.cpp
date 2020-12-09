@@ -38,7 +38,6 @@
 
 extern "C" {
 #include "fanet_GS/fanet_struct.h"
-//#include "fanet_GS/fanet_radio.h"
 #include "fanet_GS/fanet_mac.h"
 #include "fanet_GS/fanet_terminal.h"
 #include "fanet_GS/fanet_t0_ack.h"
@@ -60,89 +59,12 @@ using namespace httplib;
 
 bool finished = false;
 
-
 //---------------------------------------------------------------------
-
-void forwardTracksToInternet(bool doTrackPush, bool pushToAprs, bool pushToKtrax, bool pushToTelegram) {
-    VLOG_SCOPE_F(1, "TrackConsumer - trying to consume...");
-    TDequeConcurrent<Track*> *trackQueuePtr = &GroundStation::getInstance()->trackQueue;
-    list<Track*> trackList;
-    if (!trackQueuePtr->empty()) {
-        LOG_SCOPE_FUNCTION(1);
-        while (!trackQueuePtr->empty()) {
-            auto tr = trackQueuePtr->pop_front();
-            LOG_F(INFO, "APRS - consuming (%lu) : %s", trackQueuePtr->size(), tr->toString().c_str());
-            GroundStation::getInstance()->addTrack(tr);
-            trackList.emplace_back(tr);
-        }
-        if (doTrackPush && pushToAprs) {
-            LOG_F(INFO, "TrackConsumer - push to APRS");
-            AprsOgnManager::getInstance()->sendTrackList(trackList);
-        } else {
-            LOG_F(INFO, "TrackConsumer - APRS - NOT sending");
-        }
-    } else {
-        LOG_F(INFO, "TrackConsumer - Nothing to send");
-    }
-}
-
-void queuesConsumer() {
-    LOG_F(INFO, "queuesConsumer - Start");
-    loguru::set_thread_name("Queue-Cons");
-
-    bool doTrackPush = Configuration::getInstance()->getValue("/configuration/features/trackPushing/active", false);
-    LOG_IF_F(INFO, doTrackPush, "Feature: Push Tracks");
-    bool doTrackPushAprs = Configuration::getInstance()->getValue("/configuration/APRS/active", false);
-    LOG_IF_F(INFO, doTrackPushAprs, "Feature: Push Tracks to APRS");
-    bool doTrackPushKtrax = Configuration::getInstance()->getValue("/configuration/KTRAX/active", false);
-    LOG_IF_F(INFO, doTrackPushKtrax, "Feature: Push Tracks to KTRAX");
-    bool doTrackPushTelegram = Configuration::getInstance()->getValue("/configuration/Telegram/active", false);
-    LOG_IF_F(INFO, doTrackPushTelegram, "Feature: Push Tracks to Telegram");
-    int intervalTrackPush = Configuration::getInstance()->getValue("/configuration/features/trackPushing/interval", 5000);
-
-    bool doWeatherPush = Configuration::getInstance()->getValue("/configuration/features/weatherPushing/active", false);
-    int weatherPushInterval = Configuration::getInstance()->getValue("/configuration/features/weatherPushing/interval", 120);
-    int pauseSecsBetweenStations = Configuration::getInstance()->getValue("/configuration/features/weatherPushing/pause", 5);
-    int maxAgeSeconds = Configuration::getInstance()->getValue("/configuration/features/weatherPushing/maxAge", 300);
-
-    TDequeConcurrent<Packet*>* packetQueuePtr = &GroundStation::getInstance()->packetQueue;
-    TDequeConcurrent<EntityName*> *nameQueuePtr = &GroundStation::getInstance()->nameQueue;
-
-    LOG_F(INFO, "WeatherMeasureConsumer - RUN - interval %d / %d [sec]", weatherPushInterval, pauseSecsBetweenStations);
-    while (!finished) {
-        LOG_F(1, "Pushing Packets to Inet/DB server");
-        if (!packetQueuePtr->empty()) {
-            while (!packetQueuePtr->empty()) {
-                auto packet = packetQueuePtr->pop_front();
-                LOG_F(1, "Packet - consuming (%lu) : %s", packetQueuePtr->size(), packet->toString().c_str());
-                GroundStation::getInstance()->sendPacketToDfDb(packet);
-            }
-        }
-        LOG_F(1, "Pushing Names to DB");
-        if (!nameQueuePtr->empty()) {
-            while (!nameQueuePtr->empty()) {
-                auto nameEntity = nameQueuePtr->pop_front();
-                LOG_F(1, "Name - consuming (%lu) : %s", nameQueuePtr->size(), nameEntity->toString().c_str());
-                Device *device = new Device(nameEntity->id);
-                device->name = nameEntity->name;
-                device->manufacturerId = nameEntity->manufacturerId;
-                device->uniqueId = nameEntity->uniqueId;
-                device->timestamp = time(0);
-                GroundStation::getInstance()->sendDeviceToDfDb(device);
-            }
-        }
-        LOG_F(1, "Pushing FANET track data to Inet");
-        forwardTracksToInternet(doTrackPush, doTrackPushAprs, doTrackPushKtrax, doTrackPushTelegram);
-        LOG_F(7, "TrackConsumer - going to sleep for %d [msec]", intervalTrackPush);
-        std::this_thread::sleep_for(chrono::milliseconds(intervalTrackPush));
-
-    } // while
-    LOG_F(INFO, "queuesConsumer - END");
-}
 
 void weatherStationManagerRunner (int pauseSecs) {
     loguru::set_thread_name("Weather-get");
     LOG_F(INFO, "WeatherStationManager - RUN");
+    WeatherStationManager::getInstance()->init();
     WeatherStationManager::getInstance()->run();
     LOG_F(INFO, "WeatherStationManager - END");
 };
@@ -174,7 +96,6 @@ int main(int argc, char *argv[]) {
     CLI11_PARSE(app, argc, argv);
 
     cout << "-- ino FANET Groundstation --" << endl;
-	loguru::g_stderr_verbosity = 3;
 	loguru::init(argc, argv);
     loguru::add_callback("rsyslog", log_to_rsyslog, nullptr, loguru::Verbosity_MAX);
 
@@ -190,7 +111,6 @@ int main(int argc, char *argv[]) {
 	LOG_F(INFO, "FANET Groundstation: %s", Configuration::getInstance()->getStringValue("/configuration/stationName").c_str());
 
     int power = Configuration::getInstance()->getValue("/configuration/features/fanetRadio/power", 15);
-    // Initialize FANET base mechanisms
 
     Message startMsg;
     startMsg.initFromText(Configuration::getInstance()->getStringValue("/configuration/stationId"),
@@ -199,10 +119,7 @@ int main(int argc, char *argv[]) {
 
     AprsOgnManager::getInstance()->connect();
 
-    WeatherStationManager::getInstance()->init();
     std::thread threadWeatherStationManager(weatherStationManagerRunner, 60);
-
-    std::thread threadQueuesConsumer1(queuesConsumer);
 
     EntityNameManager::getInstance()->init();
 

@@ -26,10 +26,8 @@ WeatherStationManager *WeatherStationManager::instance_ = 0;
 
 void WeatherStationManager::init() {
 	LOG_SCOPE_FUNCTION(5);
-
 	Document jsonDoc;
     jsonDoc.Parse(Configuration::getInstance()->getJson().c_str());
-
     Value *wsArray = Pointer("/configuration/weatherStations").Get(jsonDoc);
     if (wsArray && wsArray->IsArray()) {
         for (auto &wsv : wsArray->GetArray()) {
@@ -148,7 +146,7 @@ void WeatherStationManager::run() {
 		VLOG_SCOPE_F(5, "WeatherStationManager - updating WeatherStations");
         for (map<string, WeatherStation *>::iterator iter = weatherStationMap_.begin();
             iter != weatherStationMap_.end(); iter++) {
-			LOG_F(5, "updating WS %s: ", iter->first.c_str());
+			LOG_F(2, "updating WS %s: ", iter->first.c_str());
             iter->second->update();
         }
 		LOG_F(7, "WeatherStationManager - going to sleep for %d [sec]", interval);

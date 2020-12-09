@@ -70,7 +70,10 @@ void WeatherStation::updateDfDb() {
             this->lastMeasure->temperature, this->lastMeasure->humidity);
     auto res = client.Get(uri, headers);    // Post does not seem to work - while it works from Postman
     //auto res = client.Post(updateUrl_.c_str(), headers, params);    // Post does not seem to work - while it works from Postman
-    //LOG_F(9, "%s", res->body.c_str());
+    if (res != nullptr)
+        LOG_F(5, "URI: %s - %s", uri, res->body.c_str());
+    else
+        LOG_F(ERROR, "updating DF-DB with %s", uri);
 }
 
 void WeatherStation::readDfDb() {

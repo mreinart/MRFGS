@@ -11,7 +11,15 @@ namespace fanet {
 
     class FanetGroundStation : public GroundStation {
     protected:
-        FanetGroundStation() : GroundStation() {};
+        bool initializedFanet_;
+        bool relayTracksLegacy2Fanet_;
+        bool relayTracksExcludeFanetPlus_; // (Do not) relay FANET+ devices which are sending LEG and FANET in parallel
+
+        FanetGroundStation() : GroundStation(),
+                                initializedFanet_(false),
+                                relayTracksLegacy2Fanet_(false),
+                                relayTracksExcludeFanetPlus_(false)
+                                {};
         void init();
 
 	public:
@@ -33,7 +41,7 @@ namespace fanet {
         void sendAirTrackToFANET(AirTrack *track);
         void sendGndTrackToFANET(GroundTrack *track);
 
-		void run();
+		void runIteration();
 
 		void stop() { finished_ = true; };
 	};
