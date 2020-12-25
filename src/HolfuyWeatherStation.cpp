@@ -53,7 +53,7 @@ void HolfuyWeatherStation::update() {
 		return;
 	}
 	try {
-		if (jsonStr.find("no_conn") == string::npos) {
+        if ((jsonStr.find("no_conn") == string::npos) && (jsonStr.find("low_batt") == string::npos)) {
 			Document d;
 			d.Parse(jsonStr.c_str());
 			WeatherMeasure *wm = new WeatherMeasure();
@@ -71,7 +71,6 @@ void HolfuyWeatherStation::update() {
 			floatValue = d["temperature"];
 			wm->temperature = floatValue.GetFloat();
 			wm->hasTemperature = true;
-
 			this->lastMeasure = wm;
 			LOG_F(5, "WeatherMeasure: %s", wm->toString().c_str());
 		}
