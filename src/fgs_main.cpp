@@ -35,7 +35,6 @@
 #include "../include/httplib.h"
 #include <curl/curl.h>
 #include "loguru.hpp"
-#include "tgbot/tgbot.h"
 
 extern "C" {
 #include "fanet_GS/fanet_struct.h"
