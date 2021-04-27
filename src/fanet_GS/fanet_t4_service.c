@@ -188,6 +188,16 @@ void code_barometric(sRawMessage *_tx_message, sWeather *_weather_data) {
     _tx_message->m_length += 2;
 }
 
+// State of Charge  (+1byte lower 4 bits: 0x00 = 0%, 0x01 = 6.666%, .. 0x0F = 100%)
+void decode_charge(sRawMessage *_rx_message, sWeather *_weather_data) {
+    unsigned int charge_int;
+    charge_int = _rx_message->message[_rx_message->m_pointer];
+    charge_int &= 0x0f;
+    _weather_data->charge = (charge_int * (float) 100) / 15;
+    _rx_message->m_pointer += 1;
+    _weather_data->has_charge = true;
+}
+
 void type_4_service_decoder(sRawMessage *_rx_message, sWeather *_weather_data) {
     memset(_weather_data, 0, sizeof(sWeather));
     float _latitude;
