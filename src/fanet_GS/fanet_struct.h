@@ -210,6 +210,7 @@ typedef struct {
     boolean wind;
     boolean humid;
     boolean barom;
+    boolean has_charge;
     boolean e_header;
     unsigned char extended_header;
     float latitude;
@@ -221,6 +222,7 @@ typedef struct {
     float wind_gusts;
     float humidity;
     float barometric;
+    float charge;
 } sWeather;
 #endif
 

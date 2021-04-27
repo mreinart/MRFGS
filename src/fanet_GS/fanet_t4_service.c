@@ -199,6 +199,7 @@ void type_4_service_decoder(sRawMessage *_rx_message, sWeather *_weather_data) {
     _weather_data->wind = false;
     _weather_data->humid = false;
     _weather_data->barom = false;
+    _weather_data->has_charge = false;
 
     if (_rx_message->message[0] & 0x80)
         _weather_data->gateway = true;
@@ -226,6 +227,9 @@ void type_4_service_decoder(sRawMessage *_rx_message, sWeather *_weather_data) {
 
         if (_rx_message->message[0] & 0x08)
             decode_barometric(_rx_message, _weather_data);
+
+        if (_rx_message->message[0] & 0x02)
+            decode_charge(_rx_message, _weather_data);
     }
 }
 

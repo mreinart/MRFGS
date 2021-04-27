@@ -548,6 +548,13 @@ void terminal_message_4(boolean _rxtx, boolean _integrity, sRadioData *_radiodat
         if (_weather_data->barom) fprintf(output_file, " %7.2fhPa", _weather_data->barometric); else fprintf(output_file, "    -.--hPa");
         fprintf(output_file, KNRM);
         fprintf(output_file, "|");
+
+        // Charge
+        if (_rxtx) fprintf(output_file, KCYN); else fprintf(output_file, KGRN);
+        if (_radiodata->crc_err) fprintf(output_file, KYEL);
+        if (_weather_data->has_charge) fprintf(output_file, " Akku %3.0f%% ", _weather_data->charge); else fprintf(output_file, " no batt info");
+        fprintf(output_file, KNRM);
+        fprintf(output_file, "|");
     }
     fprintf(output_file, "\n");
     fflush(output_file);
