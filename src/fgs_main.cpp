@@ -553,8 +553,10 @@ void queuesConsumer() {
         forwardTracksToInternet(doTrackPush, doTrackPushAprs, doTrackPushKtrax, doTrackPushTelegram);
         LOG_F(1, "Pushing FANET weather data to Inet");
         sendFanetWeatherToInternet();
-        LOG_F(1, "Pushing weather data to FANET");
-        sendWeatherToFanet(pauseSecsBetweenStations, maxAgeSeconds);
+        if (doWeatherPush) {
+            LOG_F(1, "Pushing weather data to FANET");
+            sendWeatherToFanet(pauseSecsBetweenStations, maxAgeSeconds);
+        }
         LOG_F(7, "TrackConsumer - going to sleep for %d [msec]", intervalTrackPush);
         std::this_thread::sleep_for(chrono::milliseconds(intervalTrackPush));
 
